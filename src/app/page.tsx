@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [mostImproved, setMostImproved] = useState<MostImprovedEntry[]>([]);
   const [teamTrends, setTeamTrends] = useState<TeamTrendPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedRace, setSelectedRace] = useState<TeamTrendPoint | null>(null);
   const [isRaceModalOpen, setIsRaceModalOpen] = useState(false);
   const [nextRace, setNextRace] = useState<{name: string, date: string, location?: string, notes?: string} | null>(null);
@@ -34,21 +35,22 @@ export default function Dashboard() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [years, races, runners] = await Promise.all([
-          getAvailableYearsData(),
-          getUpcomingRacesData(),
-          getRunnersByYearData()
-        ]);
-        
+        // Load years first, then other data
+        const years = await getAvailableYearsData();
         setAvailableYears(years);
-        setAllRunners(runners);
-        setAllUpcomingRaces(races);
-        
-        console.log('Loaded data:', { years, races, runners });
         
         if (years.length > 0) {
           setSelectedYear(years[0]); // Set to most recent year
         }
+        
+        // Load other data in parallel after years are set
+        const [races, runners] = await Promise.all([
+          getUpcomingRacesData(),
+          getRunnersByYearData()
+        ]);
+        
+        setAllRunners(runners);
+        setAllUpcomingRaces(races);
         
         // Set the next upcoming race
         if (races.length > 0) {
@@ -58,6 +60,8 @@ export default function Dashboard() {
         console.error('Failed to load initial data:', error);
         // Fallback to hardcoded race if sheet fails
         calculateNextRace();
+      } finally {
+        setIsInitialLoading(false);
       }
     };
     loadInitialData();

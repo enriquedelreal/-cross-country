@@ -9,9 +9,9 @@ if (!SPREADSHEET_ID) {
   throw new Error('GOOGLE_SHEETS_SPREADSHEET_ID environment variable is required');
 }
 
-// Simple in-memory cache with 30 second TTL
+// Simple in-memory cache with 5 minute TTL
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 30 * 1000; // 30 seconds
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function getCachedData<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const cached = cache.get(key);
