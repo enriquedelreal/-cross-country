@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, FileText, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin, FileText, X, Globe } from 'lucide-react';
+import { AthleticCalendar } from './AthleticCalendar';
 
 interface Race {
   name: string;
@@ -18,6 +21,8 @@ interface ScheduleModalProps {
 }
 
 export function ScheduleModal({ isOpen, onClose, races }: ScheduleModalProps) {
+  const [viewMode, setViewMode] = useState<'local' | 'athletic'>('local');
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -55,16 +60,40 @@ export function ScheduleModal({ isOpen, onClose, races }: ScheduleModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-blue-900">
             <Calendar className="h-5 w-5 text-blue-600" />
             2025 Race Schedule
           </DialogTitle>
+          
+          {/* View Mode Toggle */}
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant={viewMode === 'local' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('local')}
+              className="flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Local Schedule
+            </Button>
+            <Button
+              variant={viewMode === 'athletic' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('athletic')}
+              className="flex items-center gap-2"
+            >
+              <Globe className="h-4 w-4" />
+              Athletic.net Calendar
+            </Button>
+          </div>
         </DialogHeader>
         
         <div className="space-y-4">
-          {races.length === 0 ? (
+          {viewMode === 'athletic' ? (
+            <AthleticCalendar schoolId="16117" season="2025" />
+          ) : races.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
               <p>No upcoming races scheduled</p>
