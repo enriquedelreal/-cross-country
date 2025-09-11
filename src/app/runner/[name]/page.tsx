@@ -17,15 +17,9 @@ interface RunnerPageProps {
 }
 
 export async function generateStaticParams() {
-  try {
-    const runners = await getRunnersList();
-    return runners.map((name) => ({
-      name: encodeURIComponent(name),
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
+  // Return empty array to disable static generation
+  // This allows the page to be generated at request time
+  return [];
 }
 
 export default async function RunnerPage({ params }: RunnerPageProps) {
