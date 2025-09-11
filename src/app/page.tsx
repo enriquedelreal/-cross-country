@@ -44,10 +44,12 @@ export default function Dashboard() {
         }
         
         // Load other data in parallel after years are set
+        console.log('Loading additional data...');
         const [races, runners] = await Promise.all([
           getUpcomingRacesData(),
           getRunnersByYearData()
         ]);
+        console.log('Additional data loaded successfully');
         
         setAllRunners(runners);
         setAllUpcomingRaces(races);
