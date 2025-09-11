@@ -6,11 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Trophy, TrendingUp, Calendar } from 'lucide-react';
-import { getRunnerData } from '@/lib/actions';
+import { getRunnerData, getRunnersList } from '@/lib/actions';
 import { formatTime, formatImprovementPct } from '@/lib/format';
 import Link from 'next/link';
-import { RunnerSummary } from '@/lib/types';
-import { getRunnersList } from '@/lib/actions';
 
 interface RunnerPageProps {
   params: {
@@ -31,7 +29,8 @@ export async function generateStaticParams() {
 }
 
 export default async function RunnerPage({ params }: RunnerPageProps) {
-  const runnerName = decodeURIComponent(params.name);
+  const { name } = await params;
+  const runnerName = decodeURIComponent(name);
   
   try {
     const runnerData = await getRunnerData(runnerName);

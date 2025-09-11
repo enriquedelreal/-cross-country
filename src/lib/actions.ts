@@ -1,5 +1,19 @@
-// Client-side data fetching for static export
-import { demoRunners, demoRaces, demoRaceData } from './demo-data';
+'use server';
+
+import { 
+  getAllRows, 
+  getRunners, 
+  getRunnerSummary, 
+  getManyRunnerSummaries,
+  getTopNByBest3Mi,
+  searchRaces,
+  getTeamTrends,
+  getTopSeven,
+  getMostImproved,
+  getAvailableYears,
+  getUpcomingRaces,
+  getRunnersByYear
+} from './sheets';
 import { RaceRow, RunnerSummary, TeamTrendPoint, TopSevenEntry, MostImprovedEntry } from './types';
 
 export async function getAllRaces(): Promise<RaceRow[]> {

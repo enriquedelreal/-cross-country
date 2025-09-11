@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "GOOGLE_SHEETS_SPREADSHEET_ID": "@google_sheets_spreadsheet_id",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
+    "GOOGLE_SERVICE_ACCOUNT_KEY": "@google_service_account_key"
+  }
+}
