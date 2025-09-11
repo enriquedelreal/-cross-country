@@ -20,11 +20,6 @@ interface RunnerPageProps {
   };
 }
 
-export async function generateStaticParams() {
-  // Return empty array to disable static generation
-  // This allows the page to be generated at request time
-  return [];
-}
 
 export default function RunnerPage({ params }: RunnerPageProps) {
   const [runnerName, setRunnerName] = useState<string>('');
@@ -230,8 +225,4 @@ export default function RunnerPage({ params }: RunnerPageProps) {
       </main>
     </div>
   );
-  } catch (error) {
-    console.error('Error fetching runner data:', error);
-    notFound();
-  }
 }
