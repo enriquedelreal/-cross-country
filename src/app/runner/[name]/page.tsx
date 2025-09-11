@@ -9,6 +9,8 @@ import { ArrowLeft, Trophy, TrendingUp, Calendar } from 'lucide-react';
 import { getRunnerData } from '@/lib/actions';
 import { formatTime, formatImprovementPct } from '@/lib/format';
 import Link from 'next/link';
+import { RunnerSummary } from '@/lib/types';
+import { getRunnersList } from '@/lib/actions';
 
 interface RunnerPageProps {
   params: {
@@ -16,164 +18,131 @@ interface RunnerPageProps {
   };
 }
 
+export async function generateStaticParams() {
+  try {
+    const runners = await getRunnersList();
+    return runners.map((name) => ({
+      name: encodeURIComponent(name),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
+}
+
 export default async function RunnerPage({ params }: RunnerPageProps) {
-  const { name } = await params;
-  const runnerName = decodeURIComponent(name);
+  const runnerName = decodeURIComponent(params.name);
   
   try {
     const runnerData = await getRunnerData(runnerName);
     
-    if (runnerData.races.length === 0) {
+    if (!runnerData || runnerData.races.length === 0) {
       notFound();
     }
 
     const { races, best3miSec, avg3miSec, lastRace, improvementPctFromSeasonStart } = runnerData;
-    
-    // Calculate additional stats
-    const firstRace = races[0];
-    const totalRaces = races.length;
-    const latestVsBest = lastRace && best3miSec ? lastRace.equiv3miSec - best3miSec : 0;
+  
+  // Calculate additional stats
+  const firstRace = races[0];
+  const latestRace = races[races.length - 1];
+  const improvementPct = improvementPctFromSeasonStart || 0;
 
-    // Prepare chart data
-    const chartData = races.map(race => ({
-      date: race.raceDate,
-      value: race.equiv3miSec,
-      raceName: race.raceName,
-      rawTime: race.timeRaw,
-      distance: race.distanceMi
-    }));
-
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Link href="/">
-                  <Button variant="outline" size="sm">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Dashboard
-                  </Button>
-                </Link>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{runnerName}</h1>
-                  <p className="text-gray-600 mt-1">Individual performance tracking</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-sm">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {totalRaces} races
-                </Badge>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{runnerName}</h1>
+                <p className="text-sm text-gray-600">Runner Profile</p>
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Stats */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Key Stats */}
-              <div className="space-y-4">
-                <StatCard
-                  title="Season Best"
-                  value={best3miSec ? formatTime(best3miSec) : 'N/A'}
-                  subtitle="3-mile equivalent"
-                  className="bg-gradient-to-br from-green-50 to-green-100 border-green-200"
-                />
-                
-                <StatCard
-                  title="Latest Race"
-                  value={lastRace ? formatTime(lastRace.equiv3miSec) : 'N/A'}
-                  subtitle={lastRace ? lastRace.raceName : 'No races'}
-                  delta={latestVsBest}
-                  className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200"
-                />
-                
-                <StatCard
-                  title="Improvement"
-                  value={formatImprovementPct(improvementPctFromSeasonStart || 0)}
-                  subtitle="First to latest race"
-                  improvementPct={improvementPctFromSeasonStart || 0}
-                  className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200"
-                />
-                
-                <StatCard
-                  title="Average Time"
-                  value={avg3miSec ? formatTime(avg3miSec) : 'N/A'}
-                  subtitle="3-mile equivalent"
-                  className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200"
-                />
-              </div>
-
-              {/* Race Summary */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                    Race Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Total Races:</span>
-                      <span className="font-medium">{totalRaces}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">First Race:</span>
-                      <span className="font-medium">{firstRace.raceName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Latest Race:</span>
-                      <span className="font-medium">{lastRace?.raceName || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Best Race:</span>
-                      <span className="font-medium">
-                        {races.find(r => r.equiv3miSec === best3miSec)?.raceName || 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right Column - Charts and Tables */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Progress Chart */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Performance Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <TrendChart 
-                    data={chartData}
-                    title=""
-                    yAxisLabel="3-mile Equivalent Time"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Races Table */}
-              <Card className="shadow-sm">
-                <CardContent className="p-6">
-                  <RacesTable 
-                    races={races}
-                    runnerName={runnerName}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Stats */}
+          <div className="lg:col-span-1 space-y-4">
+            <StatCard
+              title="Best Time"
+              value={formatTime(best3miSec)}
+              subtitle="3-mile equivalent"
+              className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300"
+            />
+            
+            <StatCard
+              title="Average Time"
+              value={formatTime(avg3miSec)}
+              subtitle="Season average"
+              className="bg-gradient-to-br from-green-50 to-green-100 border-green-300"
+            />
+            
+            <StatCard
+              title="Latest Race"
+              value={formatTime(lastRace.equiv3miSec)}
+              subtitle={lastRace.raceName}
+              className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-300"
+            />
+            
+            <StatCard
+              title="Improvement"
+              value={formatImprovementPct(improvementPct)}
+              subtitle="Since season start"
+              improvementPct={improvementPct}
+              className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300"
+            />
           </div>
-        </main>
-      </div>
-    );
+
+          {/* Right Column - Charts and Tables */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Performance Chart */}
+            <Card className="shadow-sm border-blue-200">
+              <CardHeader className="bg-blue-50 border-b border-blue-200">
+                <CardTitle className="flex items-center gap-2 text-blue-900">
+                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                  Performance Trend
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <TrendChart 
+                  data={races.map(race => ({
+                    date: race.raceDate,
+                    value: race.equiv3miSec,
+                    raceName: race.raceName
+                  }))}
+                  title=""
+                  yAxisLabel="3-mile Equivalent Time"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Races Table */}
+            <Card className="shadow-sm border-blue-200">
+              <CardHeader className="bg-blue-50 border-b border-blue-200">
+                <CardTitle className="flex items-center gap-2 text-blue-900">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                  Race History
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <RacesTable races={races} runnerName={runnerName} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
   } catch (error) {
     console.error('Error fetching runner data:', error);
     notFound();

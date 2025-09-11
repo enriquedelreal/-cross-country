@@ -10,7 +10,7 @@ if (!SPREADSHEET_ID) {
 }
 
 // Simple in-memory cache with 30 second TTL
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 30 * 1000; // 30 seconds
 
 function getCachedData<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
