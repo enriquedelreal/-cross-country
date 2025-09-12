@@ -354,6 +354,44 @@ export async function getUpcomingRaces(): Promise<{name: string, date: string, l
   });
 }
 
+export async function getRacesByYear(year: number): Promise<{name: string, date: string, location?: string, notes?: string}[]> {
+  return getCachedData(`races-${year}`, async () => {
+    try {
+      const sheets = getSheetsClient();
+      
+      // Read from "Race Dates" sheet, columns A:D
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: 'Race Dates!A:D',
+      });
+      
+      const rows = response.data.values;
+      
+      if (!rows || rows.length <= 1) {
+        return []; // No data or just headers
+      }
+      
+      // Skip header row, map to race objects and filter by year
+      const races = rows.slice(1).map((row: string[]) => ({
+        name: row[0] || '',
+        date: row[1] || '',
+        location: row[2] || '',
+        notes: row[3] || ''
+      })).filter(race => {
+        if (!race.name || !race.date) return false;
+        const raceYear = new Date(race.date).getFullYear();
+        return raceYear === year;
+      });
+      
+      // Sort by date
+      return races.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } catch (error) {
+      console.error(`Error fetching races for year ${year}:`, error);
+      return [];
+    }
+  });
+}
+
 export async function getRunnersByYear(year?: number): Promise<string[]> {
   if (!year) return getRunners(); // Fallback to all runners if no year
   

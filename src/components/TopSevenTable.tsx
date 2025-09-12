@@ -13,11 +13,12 @@ import { getTopSevenData, getAvailableYearsData } from '@/lib/actions';
 interface TopSevenTableProps {
   data: TopSevenEntry[];
   className?: string;
+  year?: number;
+  onYearChange?: (year: number) => void;
 }
 
-export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
+export function TopSevenTable({ data, className = '', year, onYearChange }: TopSevenTableProps) {
   const router = useRouter();
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [topSevenData, setTopSevenData] = useState<TopSevenEntry[]>(data);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,9 +29,6 @@ export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
       try {
         const years = await getAvailableYearsData();
         setAvailableYears(years);
-        if (years.length > 0 && selectedYear === null) {
-          setSelectedYear(years[0]); // Set to most recent year by default
-        }
       } catch (error) {
         console.error('Failed to load available years:', error);
       }
@@ -41,10 +39,10 @@ export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
   useEffect(() => {
     // Load top seven data when year changes
     const loadTopSeven = async () => {
-      if (selectedYear !== null) {
+      if (year !== null && year !== undefined) {
         setIsLoading(true);
         try {
-          const data = await getTopSevenData(selectedYear);
+          const data = await getTopSevenData(year);
           setTopSevenData(data);
         } catch (error) {
           console.error('Failed to load top seven data:', error);
@@ -54,7 +52,7 @@ export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
       }
     };
     loadTopSeven();
-  }, [selectedYear]);
+  }, [year]);
 
   const handleRunnerClick = (runner: string) => {
     router.push(`/runner/${encodeURIComponent(runner)}`);
@@ -63,7 +61,7 @@ export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
   if (topSevenData.length === 0 && !isLoading) {
     return (
       <div className={`text-center py-8 text-gray-500 ${className}`}>
-        {selectedYear ? `No top seven data available for ${selectedYear}` : 'No top seven data available'}
+        {year ? `No top seven data available for ${year}` : 'No top seven data available'}
       </div>
     );
   }
@@ -73,20 +71,20 @@ export function TopSevenTable({ data, className = '' }: TopSevenTableProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-4">
           <h3 className="text-lg font-semibold">Top Seven</h3>
-          {availableYears.length > 0 && (
+          {availableYears.length > 0 && onYearChange && (
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
               <Select
-                value={selectedYear?.toString() || ''}
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
+                value={year?.toString() || ''}
+                onValueChange={(value) => onYearChange(parseInt(value))}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableYears.map(year => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
+                  {availableYears.map(yearOption => (
+                    <SelectItem key={yearOption} value={yearOption.toString()}>
+                      {yearOption}
                     </SelectItem>
                   ))}
                 </SelectContent>

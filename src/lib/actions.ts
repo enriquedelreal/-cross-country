@@ -12,6 +12,7 @@ import {
   getMostImproved,
   getAvailableYears,
   getUpcomingRaces,
+  getRacesByYear,
   getRunnersByYear
 } from './sheets';
 import { RaceRow, RunnerSummary, TeamTrendPoint, TopSevenEntry, MostImprovedEntry } from './types';
@@ -62,4 +63,8 @@ export async function getUpcomingRacesData(): Promise<{name: string, date: strin
 
 export async function getRunnersByYearData(year?: number): Promise<string[]> {
   return getRunnersByYear(year);
+}
+
+export async function getRacesByYearData(year: number): Promise<{name: string, date: string, location?: string, notes?: string}[]> {
+  return getRacesByYear(year);
 }

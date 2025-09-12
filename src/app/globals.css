@@ -166,3 +166,412 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Print-specific styles */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body {
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+  
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-text-xs {
+    font-size: 6px !important;
+  }
+  
+  .print-text-sm {
+    font-size: 7px !important;
+  }
+  
+  .print-text-base {
+    font-size: 8px !important;
+  }
+  
+  .print-text-lg {
+    font-size: 10px !important;
+  }
+  
+  .print-text-xl {
+    font-size: 12px !important;
+  }
+  
+  .print-text-2xl {
+    font-size: 14px !important;
+  }
+  
+  .print-p-1 {
+    padding: 1px !important;
+  }
+  
+  .print-p-2 {
+    padding: 2px !important;
+  }
+  
+  .print-p-3 {
+    padding: 3px !important;
+  }
+  
+  .print-p-4 {
+    padding: 4px !important;
+  }
+  
+  .print-py-1 {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+  }
+  
+  .print-py-2 {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+  }
+  
+  .print-py-3 {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+  }
+  
+  .print-px-1 {
+    padding-left: 1px !important;
+    padding-right: 1px !important;
+  }
+  
+  .print-px-2 {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .print-px-3 {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .print-mb-1 {
+    margin-bottom: 1px !important;
+  }
+  
+  .print-mb-2 {
+    margin-bottom: 2px !important;
+  }
+  
+  .print-mb-3 {
+    margin-bottom: 3px !important;
+  }
+  
+  .print-mb-4 {
+    margin-bottom: 4px !important;
+  }
+  
+  .print-mt-1 {
+    margin-top: 1px !important;
+  }
+  
+  .print-mt-2 {
+    margin-top: 2px !important;
+  }
+  
+  .print-mt-3 {
+    margin-top: 3px !important;
+  }
+  
+  .print-mt-4 {
+    margin-top: 4px !important;
+  }
+  
+  .print-gap-1 {
+    gap: 1px !important;
+  }
+  
+  .print-gap-2 {
+    gap: 2px !important;
+  }
+  
+  .print-gap-3 {
+    gap: 3px !important;
+  }
+  
+  .print-gap-4 {
+    gap: 4px !important;
+  }
+  
+  .print-space-y-1 > * + * {
+    margin-top: 1px !important;
+  }
+  
+  .print-space-y-2 > * + * {
+    margin-top: 2px !important;
+  }
+  
+  .print-space-y-3 > * + * {
+    margin-top: 3px !important;
+  }
+  
+  .print-space-y-4 > * + * {
+    margin-top: 4px !important;
+  }
+  
+  .print-h-3 {
+    height: 6px !important;
+  }
+  
+  .print-h-4 {
+    height: 8px !important;
+  }
+  
+  .print-h-5 {
+    height: 10px !important;
+  }
+  
+  .print-w-3 {
+    width: 6px !important;
+  }
+  
+  .print-w-4 {
+    width: 8px !important;
+  }
+  
+  .print-w-5 {
+    width: 10px !important;
+  }
+  
+  .print-min-h-screen {
+    min-height: auto !important;
+  }
+  
+  .print-bg-gray-50 {
+    background-color: white !important;
+  }
+  
+  .print-shadow-sm {
+    box-shadow: none !important;
+  }
+  
+  .print-border {
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  .print-rounded {
+    border-radius: 2px !important;
+  }
+  
+  .print-rounded-lg {
+    border-radius: 4px !important;
+  }
+  
+  .print-grid-cols-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .print-grid-cols-2 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  .print-grid-cols-3 {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+  
+  .print-col-span-1 {
+    grid-column: span 1 !important;
+  }
+  
+  .print-col-span-2 {
+    grid-column: span 2 !important;
+  }
+  
+  .print-col-span-3 {
+    grid-column: span 3 !important;
+  }
+  
+  .print-flex {
+    display: flex !important;
+  }
+  
+  .print-flex-col {
+    flex-direction: column !important;
+  }
+  
+  .print-items-center {
+    align-items: center !important;
+  }
+  
+  .print-justify-between {
+    justify-content: space-between !important;
+  }
+  
+  .print-justify-center {
+    justify-content: center !important;
+  }
+  
+  .print-text-center {
+    text-align: center !important;
+  }
+  
+  .print-font-bold {
+    font-weight: 700 !important;
+  }
+  
+  .print-font-semibold {
+    font-weight: 600 !important;
+  }
+  
+  .print-font-medium {
+    font-weight: 500 !important;
+  }
+  
+  .print-text-gray-900 {
+    color: #111827 !important;
+  }
+  
+  .print-text-gray-700 {
+    color: #374151 !important;
+  }
+  
+  .print-text-gray-600 {
+    color: #4b5563 !important;
+  }
+  
+  .print-text-gray-500 {
+    color: #6b7280 !important;
+  }
+  
+  .print-text-blue-600 {
+    color: #2563eb !important;
+  }
+  
+  .print-text-blue-700 {
+    color: #1d4ed8 !important;
+  }
+  
+  .print-text-blue-900 {
+    color: #1e3a8a !important;
+  }
+  
+  .print-bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+  
+  .print-bg-blue-100 {
+    background-color: #dbeafe !important;
+  }
+  
+  .print-bg-green-50 {
+    background-color: #f0fdf4 !important;
+  }
+  
+  .print-bg-green-100 {
+    background-color: #dcfce7 !important;
+  }
+  
+  .print-bg-yellow-50 {
+    background-color: #fefce8 !important;
+  }
+  
+  .print-bg-yellow-100 {
+    background-color: #fef3c7 !important;
+  }
+  
+  .print-border-blue-200 {
+    border-color: #bfdbfe !important;
+  }
+  
+  .print-border-blue-300 {
+    border-color: #93c5fd !important;
+  }
+  
+  .print-border-green-300 {
+    border-color: #86efac !important;
+  }
+  
+  .print-border-yellow-300 {
+    border-color: #fde047 !important;
+  }
+  
+  .print-border-gray-200 {
+    border-color: #e5e7eb !important;
+  }
+  
+  .print-border-gray-300 {
+    border-color: #d1d5db !important;
+  }
+  
+  .print-w-full {
+    width: 100% !important;
+  }
+  
+  .print-max-w-none {
+    max-width: none !important;
+  }
+  
+  .print-overflow-hidden {
+    overflow: hidden !important;
+  }
+  
+  .print-truncate {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  .print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  
+  .print-table th,
+  .print-table td {
+    border: 1px solid #e5e7eb !important;
+    padding: 1px 2px !important;
+    text-align: left !important;
+  }
+  
+  .print-table th {
+    background-color: #f9fafb !important;
+    font-weight: 600 !important;
+  }
+  
+  .print-badge {
+    display: inline-block !important;
+    padding: 1px 4px !important;
+    font-size: 7px !important;
+    font-weight: 500 !important;
+    border-radius: 2px !important;
+    border: 1px solid !important;
+  }
+  
+  .print-badge-default {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+  }
+  
+  .print-badge-secondary {
+    background-color: #6b7280 !important;
+    color: white !important;
+    border-color: #6b7280 !important;
+  }
+  
+  .print-badge-destructive {
+    background-color: #ef4444 !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+  }
+  
+  .print-chart {
+    max-height: 120px !important;
+  }
+  
+  .print-page-break {
+    page-break-before: always !important;
+  }
+  
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+  }
+}

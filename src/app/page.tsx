@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [isRaceModalOpen, setIsRaceModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [printingRunner, setPrintingRunner] = useState<string | null>(null);
 
   // Use SWR for data fetching
   const {
@@ -46,7 +47,7 @@ export default function Dashboard() {
 
   const latestTrend = teamTrends[teamTrends.length - 1];
   const avgImprovement = mostImproved.length > 0 
-    ? mostImproved.reduce((sum, runner) => sum + runner.improvementPct, 0) / mostImproved.length 
+    ? mostImproved.reduce((sum: number, runner: any) => sum + runner.improvementPct, 0) / mostImproved.length 
     : 0;
 
   const handleTeamAverageClick = () => {
@@ -58,13 +59,52 @@ export default function Dashboard() {
   };
 
   const handlePrintRunnerReport = (runnerName: string) => {
+    setPrintingRunner(runnerName);
+    
     // Open runner page in new window for printing
     const runnerUrl = `/runner/${encodeURIComponent(runnerName)}`;
     const printWindow = window.open(runnerUrl, '_blank');
     if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
+      // Wait for the page to fully load and data to be available
+      const checkForData = () => {
+        try {
+          // Check if the page has loaded and data is available
+          const isDataLoaded = printWindow.document.querySelector('[data-testid="runner-data-loaded"]') ||
+                              printWindow.document.querySelector('.animate-spin') === null; // No loading spinner
+          
+          if (isDataLoaded) {
+            // Small delay to ensure rendering is complete
+            setTimeout(() => {
+              printWindow.print();
+              setPrintingRunner(null); // Clear loading state
+            }, 500);
+          } else {
+            // Check again in 100ms
+            setTimeout(checkForData, 100);
+          }
+        } catch (error) {
+          // If we can't access the document yet, wait and try again
+          setTimeout(checkForData, 100);
+        }
       };
+      
+      printWindow.onload = () => {
+        // Start checking for data after the page loads
+        setTimeout(checkForData, 100);
+      };
+      
+      printWindow.onerror = (error) => {
+        console.error('Error loading print window:', error);
+        setPrintingRunner(null); // Clear loading state on error
+      };
+      
+      // Clear loading state if window is closed
+      printWindow.addEventListener('beforeunload', () => {
+        setPrintingRunner(null);
+      });
+    } else {
+      console.error('Failed to open print window - popup blocked?');
+      setPrintingRunner(null); // Clear loading state on error
     }
   };
 
@@ -80,7 +120,7 @@ export default function Dashboard() {
   const displayTrend = selectedRace || latestTrend;
   
   // Filter runners based on search query
-  const filteredRunners = allRunners.filter(runner =>
+  const filteredRunners = allRunners.filter((runner: string) =>
     runner.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -129,8 +169,8 @@ export default function Dashboard() {
               />
             )}
             
-            {/* Next Race Countdown */}
-            {nextRace && selectedYear && selectedYear >= new Date().getFullYear() ? (
+            {/* Next Race Countdown / Schedule */}
+            {nextRace && selectedYear ? (
               <Card 
                 className="border-blue-200 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200"
                 onClick={() => setIsScheduleModalOpen(true)}
@@ -138,22 +178,54 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-blue-900 text-sm">
                     <Clock className="h-4 w-4 text-blue-600" />
-                    Next Race
+                    {selectedYear >= new Date().getFullYear() ? `Next Race - ${selectedYear}` : `Race Schedule - ${selectedYear}`}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 mb-1">
-                      {getDaysUntilNextRace()}
+                  {selectedYear >= new Date().getFullYear() ? (
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        {getDaysUntilNextRace()}
+                      </div>
+                      <div className="text-xs text-gray-600 mb-2">days until</div>
+                      <div className="text-sm font-medium text-gray-900">{nextRace.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(nextRace.date).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-blue-500 mt-2 hover:text-blue-700">
+                        Click to view full schedule
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-600 mb-2">days until</div>
-                    <div className="text-sm font-medium text-gray-900">{nextRace.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(nextRace.date).toLocaleDateString()}
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        {allUpcomingRaces.length}
+                      </div>
+                      <div className="text-xs text-gray-600 mb-2">races in {selectedYear}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {allUpcomingRaces.length > 0 ? allUpcomingRaces[0].name : 'No races'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {allUpcomingRaces.length > 0 ? new Date(allUpcomingRaces[0].date).toLocaleDateString() : ''}
+                      </div>
+                      <div className="text-xs text-blue-500 mt-2 hover:text-blue-700">
+                        Click to view {selectedYear} schedule
+                      </div>
                     </div>
-                    <div className="text-xs text-blue-500 mt-2 hover:text-blue-700">
-                      Click to view full schedule
-                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : selectedYear && allUpcomingRaces.length === 0 ? (
+              <Card className="border-blue-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-blue-900 text-sm">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    Race Schedule - {selectedYear}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-center text-xs text-gray-500">
+                    No races scheduled for {selectedYear}
                   </div>
                 </CardContent>
               </Card>
@@ -206,14 +278,18 @@ export default function Dashboard() {
                         {searchQuery ? 'No runners found' : `No runners available (${allRunners.length} total)`}
                       </div>
                     ) : (
-                      filteredRunners.slice(0, 10).map((runner, index) => (
+                      filteredRunners.slice(0, 10).map((runner: string, index: number) => (
                         <button
                           key={runner}
                           onClick={() => handlePrintRunnerReport(runner)}
-                          className="w-full text-left p-2 text-xs bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 hover:border-blue-300 transition-colors"
+                          disabled={printingRunner === runner}
+                          className="w-full text-left p-2 text-xs bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <div className="flex items-center">
+                          <div className="flex items-center justify-between">
                             <span className="text-gray-700">{runner}</span>
+                            {printingRunner === runner && (
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                            )}
                           </div>
                         </button>
                       ))
@@ -273,7 +349,7 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <TopSevenTable data={topSeven} />
+                  <TopSevenTable data={topSeven} year={selectedYear || undefined} onYearChange={setSelectedYear} />
                 </CardContent>
               </Card>
             )}
@@ -292,7 +368,7 @@ export default function Dashboard() {
                 <CardContent>
                   {mostImproved.length > 0 ? (
                     <div className="space-y-3">
-                      {mostImproved.map((runner) => (
+                      {mostImproved.map((runner: any) => (
                         <div key={runner.runner} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
                             <div className="font-medium">{runner.runner}</div>
@@ -332,7 +408,7 @@ export default function Dashboard() {
                 <CardContent>
                   {teamTrends.length > 0 ? (
                     <TrendChart 
-                      data={teamTrends.map(trend => ({
+                      data={teamTrends.map((trend: any) => ({
                         date: trend.date,
                         value: trend.avg3miSec,
                         raceName: trend.raceName,
@@ -364,6 +440,7 @@ export default function Dashboard() {
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
         races={allUpcomingRaces}
+        year={selectedYear || undefined}
       />
     </div>
   );

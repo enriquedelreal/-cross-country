@@ -58,26 +58,26 @@ export function StatCard({
 
   return (
     <Card 
-      className={`transition-all duration-200 ${clickable ? 'hover:shadow-lg cursor-pointer hover:scale-105' : 'hover:shadow-md'} ${className}`}
+      className={`transition-all duration-200 ${clickable ? 'hover:shadow-lg cursor-pointer hover:scale-105' : 'hover:shadow-md'} ${className} print-shadow-sm print-border print-rounded`}
       onClick={clickable ? onClick : undefined}
     >
-      <CardHeader className="pb-1">
-        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+      <CardHeader className="pb-1 print-p-1 print-pb-1">
+        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2 print-text-xs print-font-medium print-text-gray-600 print-flex print-items-center print-gap-1">
           {title}
           {clickable && (
-            <span className="text-xs text-blue-600 opacity-70">Click to explore</span>
+            <span className="text-xs text-blue-600 opacity-70 print-hidden">Click to explore</span>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex items-center justify-between">
+      <CardContent className="pt-0 print-p-1 print-pt-0">
+        <div className="flex items-center justify-between print-flex print-items-center print-justify-between">
           <div>
-            <div className="text-2xl font-bold text-gray-900">{value}</div>
+            <div className="text-2xl font-bold text-gray-900 print-text-sm print-font-bold print-text-gray-900">{value}</div>
             {subtitle && (
-              <div className="text-sm text-gray-500 mt-1">{subtitle}</div>
+              <div className="text-sm text-gray-500 mt-1 print-text-xs print-text-gray-500 print-mt-1">{subtitle}</div>
             )}
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-1 print-flex print-flex-col print-items-end print-gap-1">
             {getTrendIcon()}
             {getDeltaBadge()}
             {getImprovementBadge()}

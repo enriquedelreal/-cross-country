@@ -108,19 +108,19 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
 
   return (
     <div className={className}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">Race History</h3>
-        <Button onClick={exportToCSV} variant="outline" size="sm">
+      <div className="flex items-center justify-between mb-3 hidden">
+        <h3 className="text-lg font-semibold print-hidden">Race History</h3>
+        <Button onClick={exportToCSV} variant="outline" size="sm" className="print-hidden">
           <Download className="h-4 w-4 mr-2" />
           Export CSV
         </Button>
       </div>
       
-      <div className="border rounded-lg overflow-x-auto">
-        <Table className="min-w-full">
+      <div className="border rounded-lg overflow-x-auto print-border print-rounded print-overflow-hidden">
+        <Table className="min-w-full print-table">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20 px-2 py-2">
+              <TableHead className="w-20 px-2 py-2 print-px-1 print-py-1 print-text-xs print-font-semibold">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -130,7 +130,7 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
                   Date {getSortIcon('raceDate')}
                 </Button>
               </TableHead>
-              <TableHead className="w-32 px-2 py-2">
+              <TableHead className="w-32 px-2 py-2 print-px-1 print-py-1 print-text-xs print-font-semibold">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -140,7 +140,7 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
                   Race {getSortIcon('raceName')}
                 </Button>
               </TableHead>
-              <TableHead className="w-20 px-2 py-2">
+              <TableHead className="w-20 px-2 py-2 print-px-1 print-py-1 print-text-xs print-font-semibold">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -150,7 +150,7 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
                   Time {getSortIcon('seconds')}
                 </Button>
               </TableHead>
-              <TableHead className="w-20 px-2 py-2">
+              <TableHead className="w-20 px-2 py-2 print-px-1 print-py-1 print-text-xs print-font-semibold">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -160,9 +160,9 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
                   3-mi {getSortIcon('equiv3miSec')}
                 </Button>
               </TableHead>
-              <TableHead className="w-16 px-2 py-2 text-xs">Pace</TableHead>
-              <TableHead className="w-20 px-2 py-2 text-xs">vs Prev</TableHead>
-              <TableHead className="w-16 px-2 py-2 text-xs">vs Best</TableHead>
+              <TableHead className="w-16 px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs print-font-semibold">Pace</TableHead>
+              <TableHead className="w-20 px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs print-font-semibold">vs Prev</TableHead>
+              <TableHead className="w-16 px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs print-font-semibold">vs Best</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -175,46 +175,46 @@ export function RacesTable({ races, runnerName, className = '' }: RacesTableProp
               
               return (
                 <TableRow key={`${race.raceDate}-${race.raceName}`}>
-                  <TableCell className="px-2 py-2 text-xs">
+                  <TableCell className="px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs">
                     {new Date(race.raceDate).toLocaleDateString('en-US', { 
                       month: 'short', 
                       day: 'numeric' 
                     })}
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs font-medium truncate max-w-32" title={race.raceName}>
+                  <TableCell className="px-2 py-2 text-xs font-medium truncate max-w-32 print-px-1 print-py-1 print-text-xs print-font-medium print-truncate" title={race.raceName}>
                     {race.raceName}
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs">
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono">{race.timeRaw}</span>
+                  <TableCell className="px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs">
+                    <div className="flex items-center gap-1 print-flex print-items-center print-gap-1">
+                      <span className="font-mono print-font-mono">{race.timeRaw}</span>
                       {isBest && (
-                        <Badge variant="default" className="text-xs px-1 py-0">
-                          <Trophy className="h-2 w-2 mr-0.5" />
+                        <Badge variant="default" className="text-xs px-1 py-0 print-badge print-badge-default">
+                          <Trophy className="h-2 w-2 mr-0.5 print-h-3 print-w-3" />
                           PR
                         </Badge>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs font-mono">
+                  <TableCell className="px-2 py-2 text-xs font-mono print-px-1 print-py-1 print-text-xs print-font-mono">
                     {formatTime(race.equiv3miSec)}
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs font-mono">
+                  <TableCell className="px-2 py-2 text-xs font-mono print-px-1 print-py-1 print-text-xs print-font-mono">
                     {getPacePerMile(race.seconds, race.distanceMi)}
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs">
+                  <TableCell className="px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs">
                     {vsPrevious !== null && (
                       <Badge 
                         variant={vsPrevious < 0 ? "default" : "destructive"} 
-                        className="text-xs px-1 py-0"
+                        className="text-xs px-1 py-0 print-badge"
                       >
                         {formatDelta(vsPrevious).text}
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="px-2 py-2 text-xs">
+                  <TableCell className="px-2 py-2 text-xs print-px-1 print-py-1 print-text-xs">
                     <Badge 
                       variant={vsBest === 0 ? "default" : "secondary"} 
-                      className="text-xs px-1 py-0"
+                      className="text-xs px-1 py-0 print-badge"
                     >
                       {vsBest === 0 ? 'Best' : formatDelta(vsBest).text}
                     </Badge>

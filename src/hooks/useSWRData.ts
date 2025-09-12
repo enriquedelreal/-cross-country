@@ -5,6 +5,7 @@ import {
   getMostImprovedData, 
   getTeamTrendData, 
   getUpcomingRacesData, 
+  getRacesByYearData,
   getRunnersByYearData,
   getRunnerData
 } from '@/lib/actions';
@@ -101,9 +102,28 @@ export function useUpcomingRaces() {
   };
 }
 
+export function useUpcomingRacesByYear(year?: number) {
+  const { data, error, isLoading, mutate } = useSWR(
+    year ? ['upcoming-races-by-year', year] : null,
+    () => fetcher(() => getRacesByYearData(year!)),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 300000, // 5 minutes
+    }
+  );
+  
+  return {
+    races: data || [],
+    isLoading,
+    error,
+    mutate
+  };
+}
+
 export function useRunnersByYear(year?: number) {
   const { data, error, isLoading, mutate } = useSWR(
-    year ? ['runners-by-year', year] : null,
+    year ? ['runners-by-year', year] : 'all-runners',
     () => fetcher(() => getRunnersByYearData(year)),
     {
       revalidateOnFocus: false,
@@ -142,7 +162,7 @@ export function useRunnerData(name: string) {
 // Combined hook for dashboard data
 export function useDashboardData(selectedYear: number | null) {
   const { years, isLoading: yearsLoading } = useAvailableYears();
-  const { races: upcomingRaces, isLoading: racesLoading } = useUpcomingRaces();
+  const { races: upcomingRaces, isLoading: racesLoading } = useUpcomingRacesByYear(selectedYear || undefined);
   const { runners: allRunners, isLoading: runnersLoading } = useRunnersByYear();
   
   const { topSeven, isLoading: topSevenLoading } = useTopSeven(selectedYear || undefined);

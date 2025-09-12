@@ -15,9 +15,10 @@ interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   races: Race[];
+  year?: number;
 }
 
-export function ScheduleModal({ isOpen, onClose, races }: ScheduleModalProps) {
+export function ScheduleModal({ isOpen, onClose, races, year }: ScheduleModalProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -59,7 +60,7 @@ export function ScheduleModal({ isOpen, onClose, races }: ScheduleModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-blue-900">
             <Calendar className="h-5 w-5 text-blue-600" />
-            Race Schedule
+            Race Schedule{year ? ` - ${year}` : ''}
           </DialogTitle>
         </DialogHeader>
         
