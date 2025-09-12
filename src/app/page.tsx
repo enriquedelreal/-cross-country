@@ -11,90 +11,38 @@ import { SkeletonCard, SkeletonTable, SkeletonChart, SkeletonRunnerPicker } from
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, Trophy, TrendingUp, Printer, Clock, Search } from 'lucide-react';
-import { getTopSevenData, getMostImprovedData, getTeamTrendData, getAvailableYearsData, getUpcomingRacesData, getRunnersByYearData } from '@/lib/actions';
 import { formatTime, formatImprovementPct } from '@/lib/format';
 import { TopSevenEntry, MostImprovedEntry, TeamTrendPoint } from '@/lib/types';
+import { useDashboardData } from '@/hooks/useSWRData';
 
 export default function Dashboard() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
-  const [topSeven, setTopSeven] = useState<TopSevenEntry[]>([]);
-  const [mostImproved, setMostImproved] = useState<MostImprovedEntry[]>([]);
-  const [teamTrends, setTeamTrends] = useState<TeamTrendPoint[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedRace, setSelectedRace] = useState<TeamTrendPoint | null>(null);
   const [isRaceModalOpen, setIsRaceModalOpen] = useState(false);
-  const [nextRace, setNextRace] = useState<{name: string, date: string, location?: string, notes?: string} | null>(null);
-  const [allUpcomingRaces, setAllUpcomingRaces] = useState<{name: string, date: string, location?: string, notes?: string}[]>([]);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [allRunners, setAllRunners] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load available years on mount
+  // Use SWR for data fetching
+  const {
+    years: availableYears,
+    upcomingRaces: allUpcomingRaces,
+    allRunners,
+    topSeven,
+    mostImproved,
+    teamTrends,
+    isLoading
+  } = useDashboardData(selectedYear);
+
+  // Set initial year when data loads
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Load years first, then other data
-        const years = await getAvailableYearsData();
-        setAvailableYears(years);
-        
-        if (years.length > 0) {
-          setSelectedYear(years[0]); // Set to most recent year
-        }
-        
-        // Load other data in parallel after years are set
-        console.log('Loading additional data...');
-        const [races, runners] = await Promise.all([
-          getUpcomingRacesData(),
-          getRunnersByYearData()
-        ]);
-        console.log('Additional data loaded successfully');
-        
-        setAllRunners(runners);
-        setAllUpcomingRaces(races);
-        
-        // Set the next upcoming race
-        if (races.length > 0) {
-          setNextRace(races[0]);
-        }
-      } catch (error) {
-        console.error('Failed to load initial data:', error);
-        // Fallback to hardcoded race if sheet fails
-        calculateNextRace();
-      } finally {
-        setIsInitialLoading(false);
-      }
-    };
-    loadInitialData();
-  }, []);
+    if (availableYears.length > 0 && selectedYear === null) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
-  // Load data when year changes
-  useEffect(() => {
-    if (selectedYear === null) return;
+  // Get next race
+  const nextRace = allUpcomingRaces.length > 0 ? allUpcomingRaces[0] : null;
 
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const [topSevenData, mostImprovedData, teamTrendsData, runnersData] = await Promise.all([
-          getTopSevenData(selectedYear),
-          getMostImprovedData(selectedYear),
-          getTeamTrendData(selectedYear),
-          getRunnersByYearData(selectedYear)
-        ]);
-        setTopSeven(topSevenData);
-        setMostImproved(mostImprovedData);
-        setTeamTrends(teamTrendsData);
-        setAllRunners(runnersData);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [selectedYear]);
 
   const latestTrend = teamTrends[teamTrends.length - 1];
   const avgImprovement = mostImproved.length > 0 
@@ -120,15 +68,6 @@ export default function Dashboard() {
     }
   };
 
-  const calculateNextRace = () => {
-    // This would typically come from your data, but for now we'll use a placeholder
-    const today = new Date();
-    const nextRaceDate = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days from now
-    setNextRace({
-      name: "State Championships",
-      date: nextRaceDate.toISOString().split('T')[0]
-    });
-  };
 
   const getDaysUntilNextRace = () => {
     if (!nextRace) return 0;

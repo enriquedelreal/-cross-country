@@ -10,8 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Trophy, TrendingUp, Calendar } from 'lucide-react';
-import { getRunnerData, getRunnersList, getAvailableYearsData } from '@/lib/actions';
 import { formatTime, formatImprovementPct } from '@/lib/format';
+import { useRunnerData, useAvailableYears } from '@/hooks/useSWRData';
 import Link from 'next/link';
 
 interface RunnerPageProps {
@@ -23,46 +23,27 @@ interface RunnerPageProps {
 
 export default function RunnerPage({ params }: RunnerPageProps) {
   const [runnerName, setRunnerName] = useState<string>('');
-  const [runnerData, setRunnerData] = useState<any>(null);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
+  // Get runner name from params
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const { name } = await params;
-        const decodedName = decodeURIComponent(name);
-        setRunnerName(decodedName);
-
-        const [data, years] = await Promise.all([
-          getRunnerData(decodedName),
-          getAvailableYearsData()
-        ]);
-
-        if (!data || data.races.length === 0) {
-          setError('Runner not found');
-          return;
-        }
-
-        setRunnerData(data);
-        setAvailableYears(years);
-        
-        // Set to most recent year by default
-        if (years.length > 0) {
-          setSelectedYear(years[0]);
-        }
-      } catch (err) {
-        console.error('Error loading runner data:', err);
-        setError('Failed to load runner data');
-      } finally {
-        setIsLoading(false);
-      }
+    const loadName = async () => {
+      const { name } = await params;
+      setRunnerName(decodeURIComponent(name));
     };
-
-    loadData();
+    loadName();
   }, [params]);
+
+  // Use SWR for data fetching
+  const { runnerData, isLoading, error } = useRunnerData(runnerName);
+  const { years: availableYears } = useAvailableYears();
+
+  // Set initial year when data loads
+  useEffect(() => {
+    if (availableYears.length > 0 && selectedYear === null) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
   if (isLoading) {
     return (

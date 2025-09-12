@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, User, Users, Calendar, ToggleLeft, ToggleRight } from 'lucide-react';
-import { getRunnersList, getRunnersByYearData, getAvailableYearsData } from '@/lib/actions';
+import { useAvailableYears, useRunnersByYear } from '@/hooks/useSWRData';
 
 interface RunnerPickerProps {
   onSelectRunner?: (name: string) => void;
@@ -31,51 +31,26 @@ export function RunnerPicker({
   year,
   onYearChange
 }: RunnerPickerProps) {
-  const [runners, setRunners] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<string[]>(selectedRunners);
   const [selectedYear, setSelectedYear] = useState<number | null>(year || null);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [compareMode, setCompareMode] = useState<boolean>(allowMultiple);
   const router = useRouter();
 
-  // Load available years on mount
-  useEffect(() => {
-    const loadYears = async () => {
-      try {
-        const years = await getAvailableYearsData();
-        setAvailableYears(years);
-        if (years.length > 0 && selectedYear === null) {
-          const newYear = years[0];
-          setSelectedYear(newYear);
-          onYearChange?.(newYear);
-        }
-      } catch (error) {
-        console.error('Failed to load years:', error);
-      }
-    };
-    loadYears();
-  }, []);
+  // Use SWR for data fetching
+  const { years: availableYears, isLoading: yearsLoading } = useAvailableYears();
+  const { runners, isLoading: runnersLoading } = useRunnersByYear(selectedYear || undefined);
+  
+  const isLoading = yearsLoading || runnersLoading;
 
-  // Load runners when year changes
+  // Set initial year when data loads
   useEffect(() => {
-    const fetchRunners = async () => {
-      if (selectedYear === null) return;
-      
-      setIsLoading(true);
-      try {
-        const runnersList = await getRunnersByYearData(selectedYear);
-        setRunners(runnersList);
-      } catch (error) {
-        console.error('Failed to fetch runners:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRunners();
-  }, [selectedYear]);
+    if (availableYears.length > 0 && selectedYear === null) {
+      const newYear = availableYears[0];
+      setSelectedYear(newYear);
+      onYearChange?.(newYear);
+    }
+  }, [availableYears, selectedYear, onYearChange]);
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
