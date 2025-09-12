@@ -10,7 +10,7 @@ import { ScheduleModal } from '@/components/ScheduleModal';
 import { SkeletonCard, SkeletonTable, SkeletonChart, SkeletonRunnerPicker } from '@/components/SkeletonLoader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Trophy, TrendingUp, Printer, Clock, Search } from 'lucide-react';
+import { Users, Trophy, TrendingUp, Clock } from 'lucide-react';
 import { formatTime, formatImprovementPct } from '@/lib/format';
 import { TopSevenEntry, MostImprovedEntry, TeamTrendPoint } from '@/lib/types';
 import { useDashboardData } from '@/hooks/useSWRData';
@@ -20,8 +20,6 @@ export default function Dashboard() {
   const [selectedRace, setSelectedRace] = useState<TeamTrendPoint | null>(null);
   const [isRaceModalOpen, setIsRaceModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [printingRunner, setPrintingRunner] = useState<string | null>(null);
 
   // Use SWR for data fetching
   const {
@@ -58,55 +56,6 @@ export default function Dashboard() {
     setSelectedRace(race);
   };
 
-  const handlePrintRunnerReport = (runnerName: string) => {
-    setPrintingRunner(runnerName);
-    
-    // Open runner page in new window for printing
-    const runnerUrl = `/runner/${encodeURIComponent(runnerName)}`;
-    const printWindow = window.open(runnerUrl, '_blank');
-    if (printWindow) {
-      // Wait for the page to fully load and data to be available
-      const checkForData = () => {
-        try {
-          // Check if the page has loaded and data is available
-          const isDataLoaded = printWindow.document.querySelector('[data-testid="runner-data-loaded"]') ||
-                              printWindow.document.querySelector('.animate-spin') === null; // No loading spinner
-          
-          if (isDataLoaded) {
-            // Small delay to ensure rendering is complete
-            setTimeout(() => {
-              printWindow.print();
-              setPrintingRunner(null); // Clear loading state
-            }, 500);
-          } else {
-            // Check again in 100ms
-            setTimeout(checkForData, 100);
-          }
-        } catch (error) {
-          // If we can't access the document yet, wait and try again
-          setTimeout(checkForData, 100);
-        }
-      };
-      
-      printWindow.onload = () => {
-        // Start checking for data after the page loads
-        setTimeout(checkForData, 100);
-      };
-      
-      printWindow.onerror = (error) => {
-        console.error('Error loading print window:', error);
-        setPrintingRunner(null); // Clear loading state on error
-      };
-      
-      // Clear loading state if window is closed
-      printWindow.addEventListener('beforeunload', () => {
-        setPrintingRunner(null);
-      });
-    } else {
-      console.error('Failed to open print window - popup blocked?');
-      setPrintingRunner(null); // Clear loading state on error
-    }
-  };
 
 
   const getDaysUntilNextRace = () => {
@@ -118,11 +67,6 @@ export default function Dashboard() {
   };
 
   const displayTrend = selectedRace || latestTrend;
-  
-  // Filter runners based on search query
-  const filteredRunners = allRunners.filter((runner: string) =>
-    runner.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -245,59 +189,6 @@ export default function Dashboard() {
               </Card>
             )}
 
-            {/* Print Reports */}
-            <Card className="border-blue-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-blue-900 text-sm">
-                  <Printer className="h-4 w-4 text-blue-600" />
-                  Print Reports
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-600 mb-3">
-                    Print individual runner reports
-                  </p>
-                  
-                  {/* Search Bar */}
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search runners..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-7 pr-3 py-1.5 text-xs border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  
-                  {/* Runners List */}
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {filteredRunners.length === 0 ? (
-                      <div className="text-xs text-gray-500 text-center py-2">
-                        {searchQuery ? 'No runners found' : `No runners available (${allRunners.length} total)`}
-                      </div>
-                    ) : (
-                      filteredRunners.slice(0, 10).map((runner: string, index: number) => (
-                        <button
-                          key={runner}
-                          onClick={() => handlePrintRunnerReport(runner)}
-                          disabled={printingRunner === runner}
-                          className="w-full text-left p-2 text-xs bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-700">{runner}</span>
-                            {printingRunner === runner && (
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                            )}
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Right Column - Team Overview */}
