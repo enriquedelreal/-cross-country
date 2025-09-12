@@ -191,7 +191,7 @@ export default function Dashboard() {
             )}
             
             {/* Next Race Countdown */}
-            {nextRace && selectedYear === 2025 ? (
+            {nextRace && selectedYear && selectedYear >= new Date().getFullYear() ? (
               <Card 
                 className="border-blue-200 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200"
                 onClick={() => setIsScheduleModalOpen(true)}
