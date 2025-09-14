@@ -16,6 +16,7 @@ import {
   getRunnersByYear
 } from './sheets';
 import { RaceRow, RunnerSummary, TeamTrendPoint, TopSevenEntry, MostImprovedEntry } from './types';
+import { demoRunners, demoRaces, demoRaceData } from './demo-data';
 
 export async function getAllRaces(): Promise<RaceRow[]> {
   return getAllRows();
